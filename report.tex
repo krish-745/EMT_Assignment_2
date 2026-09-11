@@ -23,9 +23,31 @@
 \usepackage{xcolor}
 \usepackage{colortbl}
 \usepackage{titlesec}
-\usepackage{hyperref}
 \usepackage{setspace}
+\usepackage{listings}
 
+\lstdefinestyle{pythoncode}{
+    language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\bfseries\color{black},
+    stringstyle=\color{black!80},
+    commentstyle=\itshape\color{black!60},
+    numbers=left,
+    numberstyle=\tiny\color{black!50},
+    stepnumber=1,
+    numbersep=6pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    rulecolor=\color{black!30},
+    tabsize=4,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=true,
+}
+
+\usepackage{hyperref}
 \hypersetup{
     colorlinks   = true,
     linkcolor    = black,
@@ -205,5 +227,36 @@ Figure \ref{fig:ml_plot} visualizes the actual versus predicted outputs across a
 
 \section{Conclusion}
 A comprehensive computational algorithm and design window were successfully developed for transmission line analysis. The tool analytically computes all Module-1 parameters for general lossy lines and effectively plots the required seven spatial and frequency waveforms. Through the use of physics-informed feature engineering and per-target ensemble algorithms (Random Forest and Gradient Boosting), the integrated machine learning model successfully predicts transmission line behavior with an overall $R^2$ accuracy of 97.52\%, exceeding the 97\% assignment requirement.
+
+\clearpage
+\section*{Appendix: Source Code Listings}
+\addcontentsline{toc}{section}{Appendix: Source Code Listings}
+This appendix provides the complete, unabridged source code for all modules developed for this assignment:
+\begin{itemize}
+    \item \textbf{\texttt{analytics.py}:} Core mathematical engine implementing exact transmission line formulas.
+    \item \textbf{\texttt{plots.py}:} Generation of all seven spatial and frequency waveform plots.
+    \item \textbf{\texttt{ml\_model.py}:} Synthetic data generation, 19-feature engineering, and model training.
+    \item \textbf{\texttt{gui.py}:} Interactive multi-threaded Tkinter design and analysis window.
+    \item \textbf{\texttt{main.py}:} Unified launcher supporting GUI, CLI, and standalone plotting modes.
+\end{itemize}
+
+\subsection*{A. Transmission Line Mathematical Engine (\texttt{analytics.py})}
+\lstinputlisting[style=pythoncode]{code_listings/analytics.py}
+
+\clearpage
+\subsection*{B. Waveform Plotting Engine (\texttt{plots.py})}
+\lstinputlisting[style=pythoncode]{code_listings/plots.py}
+
+\clearpage
+\subsection*{C. Machine Learning Training and Inference (\texttt{ml\_model.py})}
+\lstinputlisting[style=pythoncode]{code_listings/ml_model.py}
+
+\clearpage
+\subsection*{D. Tkinter Graphical User Interface (\texttt{gui.py})}
+\lstinputlisting[style=pythoncode]{code_listings/gui.py}
+
+\clearpage
+\subsection*{E. Application Launcher and CLI Interface (\texttt{main.py})}
+\lstinputlisting[style=pythoncode]{code_listings/main.py}
 
 \end{document}
