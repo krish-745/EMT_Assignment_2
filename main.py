@@ -118,7 +118,7 @@ def run_cli_demo():
         print(f"  {name:<18} {exact:>14.6g} {ml_val:>14.6g} {err:>8.2f}%")
 
     # ── Generate plots ────────────────────────────────────────────
-    print("\n[5] GENERATING ALL 7 PLOTS (saved to plots_output/)")
+    print("\n[5] GENERATING ALL 10 PLOTS (saved to plots_output/)")
     print("-" * 40)
     try:
         from plots import generate_all_plots

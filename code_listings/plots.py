@@ -6,9 +6,9 @@ Transmission Line Waveform & Analysis Plots
 Generates all 7 required plots and saves them as high-resolution PNG files.
 
 Plots produced:
-  1. |V(d)| -- Voltage magnitude along the line
-  2. |I(d)| -- Current magnitude along the line
-  3. |Gamma(d)| -- Reflection coefficient magnitude along the line
+  1. |V(d)| — Voltage magnitude along the line
+  2. |I(d)| — Current magnitude along the line
+  3. |Gamma(d)| — Reflection coefficient magnitude along the line
   4. Zin (Real & Imaginary) vs. distance
   5. VSWR vs. frequency
   6. alpha & beta vs. frequency
@@ -43,27 +43,33 @@ os.makedirs(PLOT_DIR, exist_ok=True)
 # Style helper
 # ---------------------------------------------------------------------------
 COLORS = {
-    "voltage":   "#1f77b4",
-    "current":   "#ff7f0e",
-    "gamma":     "#2ca02c",
-    "zin_real":  "#d62728",
-    "zin_imag":  "#9467bd",
-    "vswr":      "#8c564b",
-    "alpha":     "#e377c2",
-    "beta":      "#7f7f7f",
-    "envelope":  "#17becf",
+    "voltage":   "crimson",
+    "current":   "darkgreen",
+    "gamma":     "indigo",
+    "zin_real":  "saddlebrown",
+    "zin_imag":  "midnightblue",
+    "vswr":      "darkorange",
+    "alpha":     "teal",
+    "beta":      "maroon",
+    "envelope":  "slategray",
 }
 
 def _style_axes(ax, title, xlabel, ylabel, grid=True):
     """Apply consistent styling to an axes object."""
-    ax.set_title(title, fontsize=12, fontweight="bold", pad=10)
-    ax.set_xlabel(xlabel, fontsize=10)
-    ax.set_ylabel(ylabel, fontsize=10)
+    ax.set_title(title, fontsize=12, fontweight="bold", pad=10, fontname="Comic Sans MS" if "Comic Sans MS" in [f.name for f in matplotlib.font_manager.fontManager.ttflist] else "sans-serif")
+    ax.set_xlabel(xlabel, fontsize=10, fontstyle="italic")
+    ax.set_ylabel(ylabel, fontsize=10, fontstyle="italic")
     ax.tick_params(labelsize=9)
     if grid:
-        ax.grid(True, linestyle="--", alpha=0.6)
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+        ax.grid(True, linestyle=":", alpha=0.5, color="gray")
+    ax.spines["top"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["left"].set_visible(True)
+    ax.spines["top"].set_color("black")
+    ax.spines["right"].set_color("black")
+    ax.spines["bottom"].set_color("black")
+    ax.spines["left"].set_color("black")
 
 
 def _save_fig(fig, filename):
@@ -93,7 +99,7 @@ def plot_voltage(R, L, G, C, f, d_total, ZL_real, ZL_imag, n=300, save=True):
     fig, ax = plt.subplots(figsize=(7, 4))
     ax.plot(z_arr, np.abs(V), color=COLORS["voltage"], linewidth=2)
     _style_axes(ax,
-                title="|V(z)| -- Voltage Magnitude Along Transmission Line",
+                title="|V(z)| — Voltage Magnitude Along Transmission Line",
                 xlabel="Distance from Load  z  (m)",
                 ylabel="|V(z)|  (V, normalized)")
     ax.fill_between(z_arr, np.abs(V), alpha=0.15, color=COLORS["voltage"])
@@ -122,7 +128,7 @@ def plot_current(R, L, G, C, f, d_total, ZL_real, ZL_imag, n=300, save=True):
     fig, ax = plt.subplots(figsize=(7, 4))
     ax.plot(z_arr, np.abs(I), color=COLORS["current"], linewidth=2)
     _style_axes(ax,
-                title="|I(z)| -- Current Magnitude Along Transmission Line",
+                title="|I(z)| — Current Magnitude Along Transmission Line",
                 xlabel="Distance from Load  z  (m)",
                 ylabel="|I(z)|  (A, normalized)")
     ax.fill_between(z_arr, np.abs(I), alpha=0.15, color=COLORS["current"])
@@ -140,7 +146,7 @@ def plot_current(R, L, G, C, f, d_total, ZL_real, ZL_imag, n=300, save=True):
 # ---------------------------------------------------------------------------
 def plot_reflection_coefficient(R, L, G, C, f, d_total, ZL_real, ZL_imag,
                                 n=300, save=True):
-    """Plot |Gamma(z)| -- reflection coefficient magnitude along the line."""
+    """Plot |Gamma(z)| — reflection coefficient magnitude along the line."""
     ZL    = complex(ZL_real, ZL_imag)
     gamma, _, _ = compute_gamma(R, L, G, C, f)
     Zo    = compute_Zo(R, L, G, C, f)
@@ -152,11 +158,11 @@ def plot_reflection_coefficient(R, L, G, C, f, d_total, ZL_real, ZL_imag,
     fig, ax = plt.subplots(figsize=(7, 4))
     ax.plot(z_arr, np.abs(Gamma_z), color=COLORS["gamma"], linewidth=2)
     _style_axes(ax,
-                title="|Gamma(z)| -- Reflection Coefficient Magnitude Along Line",
+                title="|Γ(z)| — Reflection Coefficient Magnitude Along Line",
                 xlabel="Distance from Load  z  (m)",
-                ylabel="|Gamma(z)|  (dimensionless)")
+                ylabel="|Γ(z)|  (dimensionless)")
     ax.axhline(y=np.abs(Gamma_L), linestyle="--", color="gray",
-               linewidth=1, label=f"|GammaL| = {np.abs(Gamma_L):.3f}")
+               linewidth=1, label=f"|ΓL| = {np.abs(Gamma_L):.3f}")
     ax.legend(fontsize=8)
     ax.fill_between(z_arr, np.abs(Gamma_z), alpha=0.15, color=COLORS["gamma"])
     fig.tight_layout()
@@ -183,9 +189,9 @@ def plot_Zin(R, L, G, C, f, d_total, ZL_real, ZL_imag, n=300, save=True):
     ax.plot(z_arr, np.imag(Zin_z), color=COLORS["zin_imag"],
             linewidth=2, label="Im(Zin)", linestyle="--")
     _style_axes(ax,
-                title="Zin(z) -- Input Impedance Along Transmission Line",
+                title="Zin(z) — Input Impedance Along Transmission Line",
                 xlabel="Distance from Load  z  (m)",
-                ylabel="Impedance  (Ohm)")
+                ylabel="Impedance  (Ω)")
     ax.legend(fontsize=9)
     ax.axhline(y=0, color="black", linewidth=0.5)
     fig.tight_layout()
@@ -231,15 +237,15 @@ def plot_alpha_beta_vs_frequency(R, L, G, C,
 
     ax1.plot(freqs / 1e6, alphas, color=COLORS["alpha"], linewidth=2)
     _style_axes(ax1,
-                title="Attenuation Constant alpha vs. Frequency",
+                title="Attenuation Constant α vs. Frequency",
                 xlabel="",
-                ylabel="alpha  (Np/m)")
+                ylabel="α  (Np/m)")
 
     ax2.plot(freqs / 1e6, betas, color=COLORS["beta"], linewidth=2)
     _style_axes(ax2,
-                title="Phase Constant beta vs. Frequency",
+                title="Phase Constant β vs. Frequency",
                 xlabel="Frequency  (MHz)",
-                ylabel="beta  (rad/m)")
+                ylabel="β  (rad/m)")
 
     fig.suptitle("Propagation Parameters vs. Frequency",
                  fontsize=13, fontweight="bold", y=1.01)
@@ -255,11 +261,11 @@ def plot_alpha_beta_vs_frequency(R, L, G, C,
 def plot_standing_wave(R, L, G, C, f, d_total, ZL_real, ZL_imag,
                        n=500, save=True):
     """
-    Plot the standing wave pattern -- voltage envelope (V_max and V_min).
+    Plot the standing wave pattern — voltage envelope (V_max and V_min).
 
     Envelope:
-        V_max(z) = |V+| * (1 + |Gamma(z)|)   <- constructive
-        V_min(z) = |V+| * (1 - |Gamma(z)|)   <- destructive
+        V_max(z) = |V+| * (1 + |Gamma(z)|)   ← constructive
+        V_min(z) = |V+| * (1 - |Gamma(z)|)   ← destructive
     """
     ZL    = complex(ZL_real, ZL_imag)
     gamma, _, _ = compute_gamma(R, L, G, C, f)
@@ -290,34 +296,132 @@ def plot_standing_wave(R, L, G, C, f, d_total, ZL_real, ZL_imag,
 
 
 # ---------------------------------------------------------------------------
-# Convenience: generate all 7 plots at once
+# Plot 8: Loss Behavior (alpha/beta vs Frequency)
+# ---------------------------------------------------------------------------
+def plot_loss_behavior(R, L, G, C, f_start=1e9, f_end=5e9, n=500, save=True):
+    freqs = np.linspace(f_start, f_end, n)
+    ratios = np.zeros(n)
+    for i, f in enumerate(freqs):
+        gamma, alpha, beta = compute_gamma(R, L, G, C, f)
+        ratios[i] = alpha / (beta if beta != 0 else 1e-15)
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.plot(freqs / 1e9, ratios, color="teal", linestyle="-.", linewidth=2.5, label="Attenuation Ratio")
+    ax.fill_between(freqs / 1e9, ratios, color="teal", alpha=0.15)
+    ax.set_title("Frequency Dependence of Attenuation/Phase", fontsize=12, fontweight="bold", color="darkslategrey")
+    ax.set_xlabel("Operating Frequency (GHz)", fontsize=11)
+    ax.set_ylabel(r"Ratio ($\alpha/\beta$)", fontsize=11)
+    ax.grid(True, linestyle=":", color="gray", alpha=0.5)
+    ax.legend(loc="upper right")
+    fig.tight_layout()
+    if save:
+        _save_fig(fig, "08_loss_behavior.png")
+    return fig
+
+# ---------------------------------------------------------------------------
+# Plot 9: 3D Wave Visualizations
+# ---------------------------------------------------------------------------
+def plot_3d_waves(save=True):
+    T_period = 1.0
+    w = 2 * np.pi / T_period
+    wavelength = 0.5
+    k = 2 * np.pi / wavelength
+
+    t = np.linspace(0, 3 * T_period, 100)
+    x = np.linspace(0, 4 * wavelength, 100)
+    X, T = np.meshgrid(x, t)
+
+    forward_wave = np.real(np.exp(1j * (w * T - k * X)))
+    backward_wave = np.real(np.exp(1j * (w * T + k * X)))
+    perfect_standing = np.real(np.exp(1j * (w * T - k * X)) + 1.0 * np.exp(1j * (w * T + k * X)))
+    
+    Gamma_imperfect = 0.5 * np.exp(1j * np.pi / 4)
+    imperfect_standing = np.real(np.exp(1j * (w * T - k * X)) + Gamma_imperfect * np.exp(1j * (w * T + k * X)))
+
+    fig = plt.figure(figsize=(12, 10))
+    
+    def plot_surface(ax, Z, title, cmap):
+        surf = ax.plot_surface(X, T, Z, cmap=cmap, linewidth=0, antialiased=True)
+        ax.set_title(title, fontsize=10, fontweight="bold")
+        ax.set_xlabel('Position (m)', fontsize=8)
+        ax.set_ylabel('Time (s)', fontsize=8)
+        ax.view_init(elev=45, azim=135)
+        ax.tick_params(labelsize=7)
+        ax.grid(False)
+
+    ax1 = fig.add_subplot(221, projection='3d')
+    plot_surface(ax1, forward_wave, 'Forward Wave Only', 'plasma')
+    ax2 = fig.add_subplot(222, projection='3d')
+    plot_surface(ax2, backward_wave, 'Backward Wave Only', 'viridis')
+    ax3 = fig.add_subplot(223, projection='3d')
+    plot_surface(ax3, perfect_standing, r'Standing Wave ($\Gamma = 1$)', 'magma')
+    ax4 = fig.add_subplot(224, projection='3d')
+    plot_surface(ax4, imperfect_standing, r'Imperfect ($\Gamma = 0.5\angle 45^\circ$)', 'cividis')
+
+    fig.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.95, wspace=0.15, hspace=0.25)
+    if save:
+        _save_fig(fig, "09_3d_waves.png")
+    return fig
+
+# ---------------------------------------------------------------------------
+# Plot 10: Impedance Matching Analytics (Quarter-Wave)
+# ---------------------------------------------------------------------------
+def plot_impedance_matching(R, L, G, C, f, ZL_real, ZL_imag, save=True):
+    ZL = complex(ZL_real, ZL_imag)
+    gamma, alpha, beta = compute_gamma(R, L, G, C, f)
+    Zo = compute_Zo(R, L, G, C, f)
+    
+    l_arr = np.linspace(0.0, 0.5, 500)
+    Zin = np.zeros_like(l_arr, dtype=complex)
+    for i, l in enumerate(l_arr):
+        num = ZL * np.cos(beta * l) + 1j * Zo * np.sin(beta * l)
+        den = Zo * np.cos(beta * l) + 1j * ZL * np.sin(beta * l)
+        Zin[i] = Zo * (num / den)
+
+    fig, ax1 = plt.subplots(figsize=(8, 5))
+    color1 = 'darkcyan'
+    ax1.set_xlabel("Line Length $l$ (m)", fontsize=11)
+    ax1.set_ylabel("Resistance (Ω)", color=color1, fontsize=11)
+    ax1.plot(l_arr, np.real(Zin), color=color1, linewidth=2, label="Real Part")
+    ax1.tick_params(axis='y', labelcolor=color1)
+    ax1.grid(True, linestyle=":", alpha=0.5, color="gray")
+
+    ax2 = ax1.twinx()
+    color2 = 'darkred'
+    ax2.set_ylabel("Reactance (Ω)", color=color2, fontsize=11)
+    ax2.plot(l_arr, np.imag(Zin), color=color2, linewidth=2, linestyle="--", label="Imaginary Part")
+    ax2.tick_params(axis='y', labelcolor=color2)
+    ax2.axhline(0, color="gray", linestyle=":", linewidth=1.5)
+
+    fig.suptitle("Impedance Transformation vs Length", fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    if save:
+        _save_fig(fig, "10_impedance_matching.png")
+    return fig
+
+
+# ---------------------------------------------------------------------------
+# Convenience: generate all 10 plots at once
 # ---------------------------------------------------------------------------
 def generate_all_plots(R, L, G, C, f, d_total, ZL_real, ZL_imag,
                        f_start=1e6, f_end=1e9, save=True):
     """
-    Generate all 7 plots and return a list of (title, Figure) tuples.
+    Generate all 10 plots and return a list of (title, Figure) tuples.
     """
     figs = []
 
-    figs.append(("Voltage |V(z)|",
-                 plot_voltage(R, L, G, C, f, d_total, ZL_real, ZL_imag,
-                              save=save)))
-    figs.append(("Current |I(z)|",
-                 plot_current(R, L, G, C, f, d_total, ZL_real, ZL_imag,
-                              save=save)))
-    figs.append(("Reflection |Gamma(z)|",
-                 plot_reflection_coefficient(R, L, G, C, f, d_total,
-                                             ZL_real, ZL_imag, save=save)))
-    figs.append(("Zin vs z",
-                 plot_Zin(R, L, G, C, f, d_total, ZL_real, ZL_imag,
-                          save=save)))
-    figs.append(("VSWR vs f",
-                 plot_VSWR_vs_frequency(R, L, G, C, ZL_real, ZL_imag,
-                                        f_start, f_end, save=save)))
-    figs.append(("alpha & beta vs f",
-                 plot_alpha_beta_vs_frequency(R, L, G, C, f_start, f_end,
-                                              save=save)))
-    figs.append(("Standing Wave",
-                 plot_standing_wave(R, L, G, C, f, d_total,
-                                    ZL_real, ZL_imag, save=save)))
+    # Original 7 plots
+    figs.append(("Voltage |V(z)|", plot_voltage(R, L, G, C, f, d_total, ZL_real, ZL_imag, save=save)))
+    figs.append(("Current |I(z)|", plot_current(R, L, G, C, f, d_total, ZL_real, ZL_imag, save=save)))
+    figs.append(("Reflection |Γ(z)|", plot_reflection_coefficient(R, L, G, C, f, d_total, ZL_real, ZL_imag, save=save)))
+    figs.append(("Zin vs z", plot_Zin(R, L, G, C, f, d_total, ZL_real, ZL_imag, save=save)))
+    figs.append(("VSWR vs f", plot_VSWR_vs_frequency(R, L, G, C, ZL_real, ZL_imag, f_start, f_end, save=save)))
+    figs.append(("α & β vs f", plot_alpha_beta_vs_frequency(R, L, G, C, f_start, f_end, save=save)))
+    figs.append(("Standing Wave", plot_standing_wave(R, L, G, C, f, d_total, ZL_real, ZL_imag, save=save)))
+    
+    # New 3 advanced plots
+    figs.append(("Loss Behavior", plot_loss_behavior(R, L, G, C, f_start=1e9, f_end=5e9, save=save)))
+    figs.append(("3D Wave Visualizations", plot_3d_waves(save=save)))
+    figs.append(("Impedance Matching", plot_impedance_matching(R, L, G, C, f, ZL_real, ZL_imag, save=save)))
+
     return figs

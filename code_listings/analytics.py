@@ -6,19 +6,19 @@ Transmission Line Analytics Engine
 Computes all fundamental transmission line parameters for a general lossy line.
 
 Parameters handled:
-  - Distributed: R (Ohm/m), L (H/m), G (S/m), C (F/m)
+  - Distributed: R (Ω/m), L (H/m), G (S/m), C (F/m)
   - Frequency: f (Hz)
   - Line length: d (m)
-  - Load impedance: ZL (complex, Ohm)
+  - Load impedance: ZL (complex, Ω)
 
 Outputs computed:
-  - Zo    : Characteristic impedance (complex, Ohm)
+  - Zo    : Characteristic impedance (complex, Ω)
   - gamma : Propagation constant = alpha + j*beta  (complex, 1/m)
   - alpha : Attenuation constant (Np/m)
   - beta  : Phase constant (rad/m)
   - Gamma : Reflection coefficient at the load (complex)
   - VSWR  : Voltage Standing Wave Ratio
-  - Zin   : Input impedance at distance d from load (complex, Ohm)
+  - Zin   : Input impedance at distance d from load (complex, Ω)
   - V(z)  : Voltage distribution along line
   - I(z)  : Current distribution along line
 """
@@ -38,8 +38,8 @@ def compute_gamma(R, L, G, C, f):
 
     Parameters
     ----------
-    R, L, G, C : float  -- distributed line parameters per unit length
-    f          : float  -- frequency (Hz)
+    R, L, G, C : float  — distributed line parameters per unit length
+    f          : float  — frequency (Hz)
 
     Returns
     -------
@@ -69,7 +69,7 @@ def compute_Zo(R, L, G, C, f):
 
     Returns
     -------
-    Zo : complex (Ohm)
+    Zo : complex (Ω)
     """
     omega = 2 * np.pi * f
     Z_series = R + 1j * omega * L
@@ -105,7 +105,7 @@ def compute_VSWR(Gamma_L):
 
     Returns
     -------
-    vswr : float  (1 <= VSWR < inf)
+    vswr : float  (1 ≤ VSWR < ∞)
     """
     mag = np.abs(Gamma_L)
     mag = np.clip(mag, 0.0, 0.9999)   # avoid division by zero
@@ -132,7 +132,7 @@ def compute_Zin(Zo, ZL, gamma, d):
 
     Returns
     -------
-    Zin : complex (Ohm)
+    Zin : complex (Ω)
     """
     tanh_gd = np.tanh(gamma * d)
     Zin = Zo * (ZL + Zo * tanh_gd) / (Zo + ZL * tanh_gd)
@@ -207,11 +207,11 @@ def compute_all(R, L, G, C, f, d, ZL_real, ZL_imag):
 
     Parameters
     ----------
-    R, L, G, C : float  distributed parameters (Ohm/m, H/m, S/m, F/m)
+    R, L, G, C : float  distributed parameters (Ω/m, H/m, S/m, F/m)
     f          : float  frequency (Hz)
     d          : float  line length / distance from load (m)
-    ZL_real    : float  real part of load impedance (Ohm)
-    ZL_imag    : float  imaginary part of load impedance (Ohm)
+    ZL_real    : float  real part of load impedance (Ω)
+    ZL_imag    : float  imaginary part of load impedance (Ω)
 
     Returns
     -------

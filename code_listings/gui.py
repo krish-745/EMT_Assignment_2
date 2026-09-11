@@ -1,30 +1,30 @@
 """
 gui.py
 ======
-Tkinter GUI -- Transmission Line Analysis & Design Window
+Tkinter GUI — Transmission Line Analysis & Design Window
 =========================================================
 A complete interactive interface providing:
   - Input fields for all Tx line parameters
-  - "Compute Analytics" button -> shows all derived parameters
-  - "Plot Waveforms" button -> renders all 7 plots in a tabbed viewer
-  - "ML Predict" button -> shows ML-predicted parameters vs. exact values
-  - "Train/Reload Model" button -> (re-)trains the Random Forest model
+  - "Compute Analytics" button → shows all derived parameters
+  - "Plot Waveforms" button → renders all 7 plots in a tabbed viewer
+  - "ML Predict" button → shows ML-predicted parameters vs. exact values
+  - "Train/Reload Model" button → (re-)trains the Random Forest model
   - Status bar with progress messages
 
 Layout:
-  +-----------------------------------------------------------------+
-  |  TITLE BAR                                                      |
-  +----------------------+------------------------------------------+
-  |  INPUT PANEL         |  RESULTS PANEL                           |
-  |  (R, L, G, C, f,     |  (Zo, gamma, alpha, beta, Gamma, VSWR, Zin)           |
-  |   d, ZL_r, ZL_i)     |  + ML Predictions                       |
-  +----------------------+------------------------------------------+
-  |  BUTTON BAR                                                      |
-  +-----------------------------------------------------------------+
-  |  PLOT CANVAS (tabbed -- 7 tabs, one per plot)                    |
-  +-----------------------------------------------------------------+
-  |  STATUS BAR                                                      |
-  +-----------------------------------------------------------------+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  TITLE BAR                                                      │
+  ├──────────────────────┬──────────────────────────────────────────┤
+  │  INPUT PANEL         │  RESULTS PANEL                           │
+  │  (R, L, G, C, f,     │  (Zo, γ, α, β, Γ, VSWR, Zin)           │
+  │   d, ZL_r, ZL_i)     │  + ML Predictions                       │
+  ├──────────────────────┴──────────────────────────────────────────┤
+  │  BUTTON BAR                                                      │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  PLOT CANVAS (tabbed — 7 tabs, one per plot)                    │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  STATUS BAR                                                      │
+  └─────────────────────────────────────────────────────────────────┘
 """
 
 import tkinter as tk
@@ -69,14 +69,14 @@ FONT_STATUS = ("Segoe UI", 8)
 # Default parameter values (coaxial-cable-like example)
 # ---------------------------------------------------------------------------
 DEFAULTS = {
-    "R":      "5.0",          # Ohm/m
+    "R":      "5.0",          # Ω/m
     "L":      "250e-9",       # H/m
     "G":      "1e-4",         # S/m
     "C":      "100e-12",      # F/m
     "f":      "100e6",        # Hz   (100 MHz)
     "d":      "2.0",          # m
-    "ZL_r":   "75.0",         # Ohm  (real part)
-    "ZL_i":   "30.0",         # Ohm  (imaginary part)
+    "ZL_r":   "75.0",         # Ω  (real part)
+    "ZL_i":   "30.0",         # Ω  (imaginary part)
     "f_start":"1e6",          # Hz  (freq sweep start)
     "f_end":  "1e9",          # Hz  (freq sweep end)
 }
@@ -87,7 +87,7 @@ DEFAULTS = {
 def _fmt(val, unit="", is_complex=False):
     if is_complex:
         r, i = np.real(val), np.imag(val)
-        sign = "+" if i >= 0 else "-"
+        sign = "+" if i >= 0 else "−"
         return f"{r:.4f} {sign} j{abs(i):.4f}  {unit}"
     if isinstance(val, (float, np.floating)):
         return f"{val:.6g}  {unit}"
@@ -100,7 +100,7 @@ def _fmt(val, unit="", is_complex=False):
 class TxLineApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Transmission Line Analyzer -- Engineering Electromagnetics")
+        self.title("Transmission Line Analyzer — Engineering Electromagnetics")
         self.configure(bg=BG_MAIN)
         self.resizable(True, True)
         self.geometry("1280x820")
@@ -129,7 +129,7 @@ class TxLineApp(tk.Tk):
         frm = tk.Frame(self, bg=BG_MAIN)
         frm.pack(fill="x", padx=16, pady=(12, 0))
         tk.Label(frm,
-                 text="*  Transmission Line Analysis & Design Window",
+                 text="⚡  Transmission Line Analysis & Design Window",
                  font=FONT_TITLE, bg=BG_MAIN, fg=FG_TITLE).pack(side="left")
         tk.Label(frm,
                  text="Engineering Electromagnetics | Module-1",
@@ -141,7 +141,7 @@ class TxLineApp(tk.Tk):
 
     def _build_input_panel(self):
         """Left panel: parameter input fields."""
-        panel = tk.LabelFrame(self._main_frm, text="  [load]  Input Parameters  ",
+        panel = tk.LabelFrame(self._main_frm, text="  📥  Input Parameters  ",
                               bg=BG_PANEL, fg=FG_LABEL,
                               font=FONT_HEADER, bd=1, relief="groove",
                               padx=10, pady=8)
@@ -150,14 +150,14 @@ class TxLineApp(tk.Tk):
         self._entries = {}
 
         fields = [
-            ("R  (Ohm/m)",      "R",      "Resistance per unit length"),
+            ("R  (Ω/m)",      "R",      "Resistance per unit length"),
             ("L  (H/m)",      "L",      "Inductance per unit length"),
             ("G  (S/m)",      "G",      "Conductance per unit length"),
             ("C  (F/m)",      "C",      "Capacitance per unit length"),
             ("f  (Hz)",       "f",      "Frequency"),
             ("d  (m)",        "d",      "Line length / distance from load"),
-            ("ZL_real  (Ohm)",  "ZL_r",   "Real part of load impedance"),
-            ("ZL_imag  (Ohm)",  "ZL_i",   "Imaginary part of load impedance"),
+            ("ZL_real  (Ω)",  "ZL_r",   "Real part of load impedance"),
+            ("ZL_imag  (Ω)",  "ZL_i",   "Imaginary part of load impedance"),
             ("f_start  (Hz)", "f_start","Frequency sweep start"),
             ("f_end  (Hz)",   "f_end",  "Frequency sweep end"),
         ]
@@ -176,37 +176,37 @@ class TxLineApp(tk.Tk):
 
     def _build_results_panel(self):
         """Right panel: computed results display."""
-        panel = tk.LabelFrame(self._main_frm, text="  [chart]  Computed Parameters  ",
+        panel = tk.LabelFrame(self._main_frm, text="  📊  Computed Parameters  ",
                               bg=BG_PANEL, fg=FG_LABEL,
                               font=FONT_HEADER, bd=1, relief="groove",
                               padx=10, pady=8)
         panel.pack(side="left", fill="both", expand=True)
 
         # Analytical results
-        tk.Label(panel, text="-- Analytical Results --",
+        tk.Label(panel, text="— Analytical Results —",
                  bg=BG_PANEL, fg=ACCENT,
                  font=FONT_HEADER).grid(row=0, column=0, columnspan=2,
                                         sticky="w", pady=(0, 4))
 
         self._result_vars = {}
         result_fields = [
-            ("Zo",               "|Zo|",         "Ohm"),
-            ("/_Zo",             "angle_Zo_deg", " deg"),
-            ("gamma  (alpha + jbeta)",  "gamma_str",    ""),
-            ("alpha  (attenuation)", "alpha",        "Np/m"),
-            ("beta  (phase)",       "beta",         "rad/m"),
-            ("Gamma at load",        "|Gamma_L|",    ""),
-            ("/_Gamma",              "angle_Gamma_deg"," deg"),
+            ("Zo",               "|Zo|",         "Ω"),
+            ("∠Zo",             "angle_Zo_deg", "°"),
+            ("γ  (alpha + jβ)",  "gamma_str",    ""),
+            ("α  (attenuation)", "alpha",        "Np/m"),
+            ("β  (phase)",       "beta",         "rad/m"),
+            ("Γ at load",        "|Gamma_L|",    ""),
+            ("∠Γ",              "angle_Gamma_deg","°"),
             ("VSWR",             "VSWR",         ""),
-            ("Zin",             "|Zin|",         "Ohm"),
-            ("/_Zin",           "angle_Zin_deg", " deg"),
+            ("Zin",             "|Zin|",         "Ω"),
+            ("∠Zin",           "angle_Zin_deg", "°"),
         ]
 
         for row_i, (label, key, unit) in enumerate(result_fields):
             tk.Label(panel, text=label, bg=BG_PANEL, fg=FG_LABEL,
                      font=FONT_LABEL, anchor="w", width=22).grid(
                          row=row_i+1, column=0, sticky="w", pady=2)
-            var = tk.StringVar(value="--")
+            var = tk.StringVar(value="—")
             tk.Label(panel, textvariable=var, bg=BG_PANEL, fg=FG_VALUE,
                      font=FONT_VALUE, anchor="w", width=30).grid(
                          row=row_i+1, column=1, sticky="w", padx=6)
@@ -218,7 +218,7 @@ class TxLineApp(tk.Tk):
             sticky="ew", pady=8)
 
         # ML results
-        tk.Label(panel, text="-- ML Predictions (Random Forest) --",
+        tk.Label(panel, text="— ML Predictions (Random Forest) —",
                  bg=BG_PANEL, fg=FG_ML,
                  font=FONT_HEADER).grid(
                      row=len(result_fields)+3, column=0, columnspan=2,
@@ -226,12 +226,12 @@ class TxLineApp(tk.Tk):
 
         self._ml_vars = {}
         ml_fields = [
-            ("|Zo| predicted",      "|Zo|_pred",      "Ohm"),
-            ("alpha  predicted",        "alpha_pred",     "Np/m"),
-            ("beta  predicted",        "beta_pred",      "rad/m"),
-            ("|Gamma| predicted",       "|Gamma_L|_pred", ""),
+            ("|Zo| predicted",      "|Zo|_pred",      "Ω"),
+            ("α  predicted",        "alpha_pred",     "Np/m"),
+            ("β  predicted",        "beta_pred",      "rad/m"),
+            ("|Γ| predicted",       "|Gamma_L|_pred", ""),
             ("VSWR predicted",      "VSWR_pred",      ""),
-            ("Model R^2 (overall)",  "r2_overall",     ""),
+            ("Model R² (overall)",  "r2_overall",     ""),
         ]
 
         base = len(result_fields) + 4
@@ -239,7 +239,7 @@ class TxLineApp(tk.Tk):
             tk.Label(panel, text=label, bg=BG_PANEL, fg=FG_ML,
                      font=FONT_LABEL, anchor="w", width=22).grid(
                          row=base + row_i, column=0, sticky="w", pady=2)
-            var = tk.StringVar(value="--")
+            var = tk.StringVar(value="—")
             tk.Label(panel, textvariable=var, bg=BG_PANEL, fg=FG_ML,
                      font=FONT_VALUE, anchor="w", width=30).grid(
                          row=base + row_i, column=1, sticky="w", padx=6)
@@ -254,15 +254,15 @@ class TxLineApp(tk.Tk):
                        activebackground=BTN_ACTIVE, activeforeground=FG_TEXT,
                        bd=0, padx=16, pady=6, cursor="hand2", relief="flat")
 
-        tk.Button(bar, text="[settings]  Compute Analytics",
+        tk.Button(bar, text="⚙  Compute Analytics",
                   command=self._compute, **btn_cfg).pack(side="left", padx=4)
-        tk.Button(bar, text="[plot]  Plot All Waveforms",
+        tk.Button(bar, text="📈  Plot All Waveforms",
                   command=self._plot_all, **btn_cfg).pack(side="left", padx=4)
-        tk.Button(bar, text="[AI]  ML Predict",
+        tk.Button(bar, text="🤖  ML Predict",
                   command=self._ml_predict, **btn_cfg).pack(side="left", padx=4)
-        tk.Button(bar, text="[reload]  Train / Reload Model",
+        tk.Button(bar, text="🔄  Train / Reload Model",
                   command=self._train_model, **btn_cfg).pack(side="left", padx=4)
-        tk.Button(bar, text="[repeat]  Reset Defaults",
+        tk.Button(bar, text="🔁  Reset Defaults",
                   command=self._reset_defaults, **btn_cfg).pack(side="left", padx=4)
 
     def _build_plot_area(self):
@@ -286,13 +286,16 @@ class TxLineApp(tk.Tk):
         self._tab_canvases = {}
 
         tab_labels = [
-            "Voltage |V|",
-            "Current |I|",
-            "Reflection |Gamma|",
+            "Voltage |V(z)|",
+            "Current |I(z)|",
+            "Reflection |Γ(z)|",
             "Zin vs z",
             "VSWR vs f",
-            "alpha & beta vs f",
+            "α & β vs f",
             "Standing Wave",
+            "Loss Behavior",
+            "3D Wave Visualizations",
+            "Impedance Matching",
             "ML Performance",
         ]
         for label in tab_labels:
@@ -302,7 +305,7 @@ class TxLineApp(tk.Tk):
 
         # Placeholder labels in each tab
         for label, frm in self._tab_frames.items():
-            tk.Label(frm, text=f"[ {label} -- click 'Plot All Waveforms' ]",
+            tk.Label(frm, text=f"[ {label} — click 'Plot All Waveforms' ]",
                      bg=BG_PANEL, fg=FG_TEXT, font=FONT_LABEL).pack(
                          expand=True)
 
@@ -350,23 +353,23 @@ class TxLineApp(tk.Tk):
 
             # Format gamma as string
             a, b = res["alpha"], res["beta"]
-            sign = "+" if b >= 0 else "-"
+            sign = "+" if b >= 0 else "−"
             gamma_str = f"{a:.4e} {sign} j{abs(b):.4e}"
 
-            self._result_vars["|Zo|"].set(_fmt(res["|Zo|"], "Ohm"))
-            self._result_vars["angle_Zo_deg"].set(_fmt(res["angle_Zo_deg"], " deg"))
+            self._result_vars["|Zo|"].set(_fmt(res["|Zo|"], "Ω"))
+            self._result_vars["angle_Zo_deg"].set(_fmt(res["angle_Zo_deg"], "°"))
             self._result_vars["gamma_str"].set(gamma_str)
             self._result_vars["alpha"].set(_fmt(res["alpha"], "Np/m"))
             self._result_vars["beta"].set(_fmt(res["beta"], "rad/m"))
             self._result_vars["|Gamma_L|"].set(_fmt(res["|Gamma_L|"], ""))
             self._result_vars["angle_Gamma_deg"].set(
-                _fmt(res["angle_Gamma_deg"], " deg"))
+                _fmt(res["angle_Gamma_deg"], "°"))
             self._result_vars["VSWR"].set(_fmt(res["VSWR"], ""))
-            self._result_vars["|Zin|"].set(_fmt(res["|Zin|"], "Ohm"))
+            self._result_vars["|Zin|"].set(_fmt(res["|Zin|"], "Ω"))
             self._result_vars["angle_Zin_deg"].set(
-                _fmt(res["angle_Zin_deg"], " deg"))
+                _fmt(res["angle_Zin_deg"], "°"))
 
-            self._status("[OK] Analytics computed successfully.")
+            self._status("✓ Analytics computed successfully.")
         except Exception as e:
             messagebox.showerror("Computation Error", str(e))
             self._status("Error during computation.")
@@ -378,7 +381,7 @@ class TxLineApp(tk.Tk):
         p = self._get_params()
         if p is None:
             return
-        self._status("Generating all 7 waveform plots -- please wait...")
+        self._status("Generating all 10 analytical plots — please wait...")
         self._compute()   # refresh analytics first
 
         def _worker():
@@ -400,13 +403,16 @@ class TxLineApp(tk.Tk):
     def _render_plots(self, figs):
         """Embed matplotlib figures into Notebook tabs."""
         tab_labels = [
-            "Voltage |V|",
-            "Current |I|",
-            "Reflection |Gamma|",
+            "Voltage |V(z)|",
+            "Current |I(z)|",
+            "Reflection |Γ(z)|",
             "Zin vs z",
             "VSWR vs f",
-            "alpha & beta vs f",
+            "α & β vs f",
             "Standing Wave",
+            "Loss Behavior",
+            "3D Wave Visualizations",
+            "Impedance Matching",
         ]
         for (title, fig), tab_label in zip(figs, tab_labels):
             frm = self._tab_frames[tab_label]
@@ -419,7 +425,7 @@ class TxLineApp(tk.Tk):
             canvas.get_tk_widget().pack(fill="both", expand=True)
             self._tab_canvases[tab_label] = canvas
 
-        self._status("[OK] All 7 plots generated and saved to plots_output/")
+        self._status("✓ All 10 analytical plots generated and saved to plots_output/")
 
         # Also try ML performance plot if model is ready
         if self._bundle is not None:
@@ -463,7 +469,7 @@ class TxLineApp(tk.Tk):
             )
 
             self._ml_vars["|Zo|_pred"].set(
-                f"{pred['|Zo|_pred']:.4f}  Ohm")
+                f"{pred['|Zo|_pred']:.4f}  Ω")
             self._ml_vars["alpha_pred"].set(
                 f"{pred['alpha_pred']:.4e}  Np/m")
             self._ml_vars["beta_pred"].set(
@@ -475,7 +481,7 @@ class TxLineApp(tk.Tk):
             self._ml_vars["r2_overall"].set(
                 f"{self._bundle['r2_overall']:.4f}")
 
-            self._status("[OK] ML prediction complete.")
+            self._status("✓ ML prediction complete.")
         except Exception as e:
             messagebox.showerror("ML Error", str(e))
             self._status("ML prediction failed.")
@@ -484,7 +490,7 @@ class TxLineApp(tk.Tk):
     # Train / Reload Model
     # -----------------------------------------------------------------------
     def _train_model(self):
-        self._status("Training ML model (500 samples) -- please wait...")
+        self._status("Training ML model (500 samples) — please wait...")
 
         def _worker():
             try:

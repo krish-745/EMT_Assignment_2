@@ -1,7 +1,7 @@
 """
 main.py
 =======
-Transmission Line Analyzer -- Entry Point
+Transmission Line Analyzer — Entry Point
 =========================================
 Engineering Electromagnetics | Module-1 Assignment
 
@@ -15,7 +15,7 @@ Flags:
     --plots       Generate all plots for default parameters and exit
 
 Author  : Student | Engineering Electromagnetics
-Course  : Transmission Lines -- Module 1
+Course  : Transmission Lines — Module 1
 """
 
 import sys
@@ -46,16 +46,16 @@ def run_cli_demo():
     print("  Engineering Electromagnetics | Module-1")
     print("=" * 60)
 
-    # -- Example parameters -----------------------------------------
+    # ── Example parameters ─────────────────────────────────────────
     params = dict(
-        R        = 5.0,         # Ohm/m
+        R        = 5.0,         # Ω/m
         L        = 250e-9,      # H/m
         G        = 1e-4,        # S/m
         C        = 100e-12,     # F/m
         f        = 100e6,       # Hz  (100 MHz)
         d        = 2.0,         # m
-        ZL_real  = 75.0,        # Ohm  -- must match compute_all() signature
-        ZL_imag  = 30.0,        # Ohm
+        ZL_real  = 75.0,        # Ω  — must match compute_all() signature
+        ZL_imag  = 30.0,        # Ω
     )
 
     print("\n[1] INPUT PARAMETERS")
@@ -63,7 +63,7 @@ def run_cli_demo():
     for k, v in params.items():
         print(f"  {k:<8} = {v:.4g}")
 
-    # -- Analytical computation ------------------------------------
+    # ── Analytical computation ────────────────────────────────────
     print("\n[2] ANALYTICAL RESULTS")
     print("-" * 40)
     res = compute_all(**params)
@@ -92,7 +92,7 @@ def run_cli_demo():
                                bundle["mape_scores"]):
         print(f"    {name:<14}  R^2 = {r2:.4f}   MAPE = {mape:.2f}%")
 
-    # -- Compare analytical vs ML ----------------------------------
+    # ── Compare analytical vs ML ──────────────────────────────────
     print("\n[4] ANALYTICAL  vs.  ML PREDICTION")
     print("-" * 60)
     ZL = complex(params["ZL_real"], params["ZL_imag"])
@@ -117,8 +117,8 @@ def run_cli_demo():
         err = abs(exact - ml_val) / (abs(exact) + 1e-12) * 100
         print(f"  {name:<18} {exact:>14.6g} {ml_val:>14.6g} {err:>8.2f}%")
 
-    # -- Generate plots --------------------------------------------
-    print("\n[5] GENERATING ALL 7 PLOTS (saved to plots_output/)")
+    # ── Generate plots ────────────────────────────────────────────
+    print("\n[5] GENERATING ALL 10 PLOTS (saved to plots_output/)")
     print("-" * 40)
     try:
         from plots import generate_all_plots
@@ -165,7 +165,7 @@ def run_gui():
 # ---------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(
-        description="Transmission Line Analyzer -- Engineering Electromagnetics"
+        description="Transmission Line Analyzer — Engineering Electromagnetics"
     )
     parser.add_argument("--cli",    action="store_true",
                         help="Run CLI demonstration (no GUI)")

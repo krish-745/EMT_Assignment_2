@@ -188,25 +188,25 @@ def _best_model_for_target(j):
     GradientBoosting generalises better on harder, nonlinear targets.
     """
     configs = [
-        # |Zo| -- nearly analytical from L,C
+        # |Zo| — nearly analytical from L,C
         RandomForestRegressor(
             n_estimators=600, max_features=0.6,
             min_samples_leaf=1, n_jobs=-1, random_state=j),
-        # alpha -- sensitive to R, G, omega
+        # alpha — sensitive to R, G, omega
         GradientBoostingRegressor(
             n_estimators=500, learning_rate=0.05,
             max_depth=6, subsample=0.8,
             min_samples_leaf=2, random_state=j),
-        # beta -- nearly analytical from L, C, omega
+        # beta — nearly analytical from L, C, omega
         RandomForestRegressor(
             n_estimators=600, max_features=0.6,
             min_samples_leaf=1, n_jobs=-1, random_state=j),
-        # |Gamma_L| -- depends on Zo vs ZL ratio
+        # |Gamma_L| — depends on Zo vs ZL ratio
         GradientBoostingRegressor(
             n_estimators=500, learning_rate=0.05,
             max_depth=6, subsample=0.8,
             min_samples_leaf=2, random_state=j),
-        # VSWR -- monotonic function of |Gamma_L|
+        # VSWR — monotonic function of |Gamma_L|
         GradientBoostingRegressor(
             n_estimators=500, learning_rate=0.05,
             max_depth=6, subsample=0.8,

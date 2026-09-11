@@ -45,6 +45,7 @@
     captionpos=b,
     breaklines=true,
     breakatwhitespace=true,
+    literate={Ω}{{$\Omega$}}1 {α}{{$\alpha$}}1 {β}{{$\beta$}}1 {Γ}{{$\Gamma$}}1 {°}{{$^\circ$}}1 {−}{{$-$}}1,
 }
 
 \usepackage{hyperref}
@@ -99,100 +100,126 @@
 % ============================================================
 \begin{document}
 
-\section{Introduction \& Theoretical Background}
-This report details a complete Python-based computational tool for Module-1 transmission line analytics. The tool computes all distributed parameters for a general lossy line ($R, L, G, C \neq 0$), plots seven key waveforms, incorporates a Machine Learning (ML) prediction model achieving $>97\%$ accuracy, and wraps the functionality in an interactive design window.
+\section{Introduction \& Theoretical Overview}
+This document outlines the development of a comprehensive Python application designed for Transmission Line analysis in Module-1 of the Engineering Electromagnetics course. The software evaluates the fundamental distributed parameters ($R, L, G, C$) to determine line behavior, visualizes key wave properties, and utilizes a Machine Learning (ML) regression model capable of predicting these metrics with over 97\% accuracy. The entire workflow is accessible via a custom graphical user interface.
 
-For a line with parameters $R, L, G, C$ operating at angular frequency $\omega = 2\pi f$, the complex propagation constant $\gamma$ and characteristic impedance $Z_0$ are defined as:
+For an arbitrary lossy line excited at an angular frequency $\omega = 2\pi f$, the propagation constant $\gamma$ and the characteristic impedance $Z_0$ are given by the standard telegrapher's equations:
 \begin{equation}
     \gamma = \alpha + j\beta = \sqrt{(R + j\omega L)(G + j\omega C)}, \qquad
     Z_0 = \sqrt{\frac{R + j\omega L}{G + j\omega C}}
 \end{equation}
-where $\alpha$ is the attenuation constant (Np/m) and $\beta$ is the phase constant (rad/m).
+Here, $\alpha$ represents the signal attenuation in Np/m, and $\beta$ denotes the phase shift in rad/m.
 
-For a line terminated by a load impedance $Z_L$, the reflection coefficient at the load is $\Gamma_L = (Z_L - Z_0)/(Z_L + Z_0)$. The reflection coefficient at a distance $z$ from the load (moving towards the source) decays as $\Gamma(z) = \Gamma_L e^{-2\gamma z}$. The Voltage Standing Wave Ratio (VSWR), a scalar measure of impedance mismatch, is given by $\text{VSWR} = (1+|\Gamma_L|)/(1-|\Gamma_L|)$.
-The input impedance $Z_{in}$ at distance $d$ from the load is calculated using the general formula:
+When terminated with a load $Z_L$, the mismatch creates a reflection coefficient $\Gamma_L = (Z_L - Z_0)/(Z_L + Z_0)$. The voltage standing wave ratio (VSWR) is derived directly from the reflection magnitude as $\text{VSWR} = (1+|\Gamma_L|)/(1-|\Gamma_L|)$. The transformed input impedance $Z_{in}$ at any distance $d$ from the load is calculated analytically as:
 \begin{equation}
     Z_{in}(d) = Z_0 \frac{Z_L + Z_0\tanh(\gamma d)}{Z_0 + Z_L\tanh(\gamma d)}
 \end{equation}
 
-\section{Algorithm Design \& Software Architecture}
-The software tool is implemented in Python 3.12 and is modularized into distinct components to separate mathematical computation from the user interface:
+\section{Software Implementation}
+The transmission line tool is built using Python 3.12, utilizing a modular architecture to strictly decouple the backend mathematics from the frontend visualizations:
 \begin{itemize}
-    \item \textbf{\texttt{analytics.py}:} The core math engine evaluating exact analytical equations using complex arithmetic (\texttt{NumPy}).
-    \item \textbf{\texttt{plots.py}:} Visualizes the seven required waveforms using \texttt{matplotlib}.
-    \item \textbf{\texttt{ml\_model.py}:} Generates synthetic data, trains the Random Forest/Gradient Boosting models, and handles inference.
-    \item \textbf{\texttt{gui.py} \& \texttt{main.py}:} A multi-threaded \texttt{Tkinter} GUI that provides a responsive analysis window, embedding plots directly into a tabbed notebook canvas.
+    \item \textbf{\texttt{analytics.py}:} The numerical engine responsible for complex arithmetic and matrix evaluations using \texttt{NumPy}.
+    \item \textbf{\texttt{plots.py}:} The visualization module generating publication-ready matplotlib graphics for wave behavior.
+    \item \textbf{\texttt{ml\_model.py}:} The predictive modeling pipeline, covering dataset synthesis, feature engineering, and model inference.
+    \item \textbf{\texttt{gui.py} \& \texttt{main.py}:} The frontend components that host the interactive \texttt{Tkinter} dashboard, threading processes to maintain a responsive user experience.
 \end{itemize}
 
-\section{Waveform Analysis}
+\section{Standard Waveform Characteristics}
+The 7 foundational spatial and frequency-domain waveforms were evaluated. These establish the fundamental operational parameters of the lossy line under test.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots_output/01_voltage_magnitude.png}
+        \caption{Voltage envelope along the line.}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots_output/02_current_magnitude.png}
+        \caption{Current magnitude along the line.}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots_output/03_reflection_coefficient.png}
+        \caption{Reflection coefficient magnitude.}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots_output/04_Zin_vs_distance.png}
+        \caption{Input impedance profile.}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots_output/05_VSWR_vs_frequency.png}
+        \caption{VSWR variation with frequency.}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plots_output/07_standing_wave_envelope.png}
+        \caption{Total Standing wave envelope.}
+    \end{minipage}
+\end{figure}
+
+\section{Advanced Analytics}
 An example lossy coaxial line was analyzed using the default parameters: $R = 5\ \Omega/\text{m}$, $L = 250\ \text{nH/m}$, $G = 0.1\ \text{mS/m}$, $C = 100\ \text{pF/m}$, $f = 100\ \text{MHz}$, $d = 2\ \text{m}$, and an inductive mismatched load of $Z_L = 75 + j30\ \Omega$.
 
-The analytically computed parameters are: $Z_0 = 50.01\angle{-0.87^\circ}\ \Omega$, $\gamma = 0.0525 + j3.142\ \text{m}^{-1}$, $\Gamma_L = 0.309\angle{37.7^\circ}$, $\text{VSWR} = 1.893$, and $Z_{in} = 74.0\angle{17.2^\circ}\ \Omega$. The spatial distributions of voltage, current, reflection coefficient, and impedance along the 2-meter line are shown in Figure \ref{fig:waveforms1}. The frequency responses and standing wave envelope are presented in Figure \ref{fig:waveforms2}.
+The developed Python routines evaluate these distributed line metrics to compute the wave propagation characteristics, standing wave profile, and complex impedances computationally, bypassing traditional graphical approaches like the Smith Chart.
+
+Figure \ref{fig:loss} illustrates the relationship between the attenuation ($\alpha$) and phase ($\beta$) constants over a broad frequency sweep. As the operating frequency scales up into the gigahertz range, the $\alpha/\beta$ fraction decays asymptotically, corroborating the theoretical premise that high-frequency lines closely approximate lossless behavior.
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/01_voltage_magnitude.png}
-        \caption{Voltage Magnitude $|V(z)|$}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/02_current_magnitude.png}
-        \caption{Current Magnitude $|I(z)|$}
-    \end{subfigure}
-    \vspace{0.3cm}
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/03_reflection_coefficient.png}
-        \caption{Reflection Coefficient $|\Gamma(z)|$}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/04_Zin_vs_distance.png}
-        \caption{Input Impedance $Z_{in}(z)$}
-    \end{subfigure}
-    \caption{Spatial waveforms along the transmission line. The $\lambda/2$ periodicity is clearly visible in the voltage, current, and impedance standing wave patterns.}
-    \label{fig:waveforms1}
+    \includegraphics[width=0.7\textwidth]{plots_output/08_loss_behavior.png}
+    \caption{Frequency sweep showing the attenuation-to-phase constant ratio ($\alpha/\beta$), highlighting asymptotic low-loss behavior at high frequencies.}
+    \label{fig:loss}
 \end{figure}
+
+To provide a more intuitive perspective on the transmission line dynamics, the temporal and spatial wave equations were visualized using 3D surface plots. Figure \ref{fig:3dwaves} showcases the isolated forward and backward traveling components alongside the resultant standing wave patterns for both perfectly matched ($\Gamma=1$) and mismatched scenarios.
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/05_VSWR_vs_frequency.png}
-        \caption{VSWR vs. Frequency}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/06_alpha_beta_vs_frequency.png}
-        \caption{Propagation Constants vs. Frequency}
-    \end{subfigure}
-    \vspace{0.3cm}
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{plots_output/07_standing_wave_envelope.png}
-        \caption{Standing Wave Envelope}
-    \end{subfigure}
-    \caption{Frequency sweep behavior (1 MHz to 1 GHz) and the spatial standing wave envelope defining the physical limits of constructive and destructive interference.}
-    \label{fig:waveforms2}
+    \includegraphics[width=0.9\textwidth]{plots_output/09_3d_waves.png}
+    \caption{Three-dimensional surface plots of propagating wave components and standing wave envelopes under different load reflection conditions.}
+    \label{fig:3dwaves}
 \end{figure}
 
-\section{Machine Learning Integration}
-The assignment requires an appropriate training model based on a minimum of 100 data points to predict any set of Tx line parameters with $\geq 97\%$ accuracy. We formulated this as a multi-target regression problem mapping $8$ inputs ($R, L, G, C, f, d, |Z_L|, \angle Z_L$) to $5$ outputs ($|Z_0|, \alpha, \beta, |\Gamma_L|, \text{VSWR}$).
+Furthermore, analytical impedance transformations were evaluated to design matching networks programmatically. By tracking the input impedance $Z_{in}$ along the line length $l$, we can identify points where the imaginary reactance drops to zero, enabling precise quarter-wave or stub matching without reading errors associated with manual Smith Chart usage. This is depicted in Figure \ref{fig:impedance}.
 
-A synthetic dataset of 500 samples was generated using uniform random sampling across realistic physical ranges for coaxial and stripline cables (e.g., $f \in [1\text{ MHz}, 3\text{ GHz}]$, $L \in [50, 600]\text{ nH/m}$).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{plots_output/10_impedance_matching.png}
+    \caption{Variation of the resistive (real) and reactive (imaginary) components of the input impedance along the transmission line.}
+    \label{fig:impedance}
+\end{figure}
 
-\subsection{Physics-Informed Feature Engineering}
-A baseline model using only the 8 raw inputs achieved $R^2 \approx 0.35$ due to the high non-linearity of the equations and target scaling spanning multiple orders of magnitude. 
+\section{Machine Learning Implementation}
+To meet the requirement of predicting transmission line metrics with high fidelity, a machine learning pipeline was established. The goal was to accurately map the primary input variables ($R, L, G, C, f, d, |Z_L|, \angle Z_L$) to the derived secondary parameters ($|Z_0|, \alpha, \beta, |\Gamma_L|, \text{VSWR}$).
 
-To overcome this and achieve the target accuracy, we implemented physics-informed feature engineering, expanding the input space to 19 features. Crucial derived features included:
+A robust synthetic dataset was formulated by drawing 500 random samples across typical parameter ranges characteristic of transmission media.
+
+\subsection{Feature Engineering and Strategy}
+Initial trials using only the raw 8 parameters yielded poor predictive power ($R^2 \approx 0.35$), primarily due to the complex, non-linear relationships inherent in the wave equations. 
+
+To boost the model's learning capacity, 11 additional physics-informed features were constructed. Key engineered variables included:
 \begin{itemize}
-    \item \textbf{Lossless $Z_0$ approximation:} $\log_{10}\sqrt{L/C}$
-    \item \textbf{Normalized Load ($|Z_L|/Z_0^{\text{approx}}$):} Since the reflection coefficient is directly governed by the ratio of load to characteristic impedance, adding this ratio as an explicit feature provided a massive accuracy gain.
-    \item \textbf{Log-Space Targets:} The regression targets $|Z_0|, \alpha, \beta$, and $\text{VSWR}$ were trained in logarithmic space ($\log_{10}$) to ensure that errors were calculated proportionally across all magnitudes.
+    \item \textbf{High-Frequency $Z_0$ Estimate:} Calculated logarithmically as $\log_{10}\sqrt{L/C}$
+    \item \textbf{Impedance Mismatch Ratio ($|Z_L|/Z_0^{\text{approx}}$):} Providing this ratio directly to the models dramatically improved the prediction of reflection-dependent metrics.
+    \item \textbf{Logarithmic Scaling:} Most output targets were transformed into log-space to ensure numerical stability and balanced gradient updates during training.
 \end{itemize}
 
-Furthermore, we used \textbf{per-target algorithm selection}: Random Forest regressors (600 trees) were used for near-analytical targets like $|Z_0|$ and $\beta$, while Gradient Boosting regressors (500 estimators) were deployed for highly sensitive non-linear targets like $\alpha$, $|\Gamma_L|$, and $\text{VSWR}$.
+The architecture employed a heterogeneous ensemble approach. Random Forests (configured with 600 estimators) were best suited for quasi-linear targets like $|Z_0|$ and $\beta$. Conversely, Gradient Boosting models (500 estimators) were superior at capturing the highly non-linear nature of $\alpha$, $|\Gamma_L|$, and $\text{VSWR}$.
 
-\subsection{Performance Results}
-The model was evaluated using a 20\% hold-out test set (100 samples). As shown in Table \ref{tab:ml}, the multi-output model achieved an overall $R^2$ of \textbf{0.9752}, successfully surpassing the required 97\% minimum accuracy threshold. 
+\subsection{Accuracy and Results}
+Evaluating the pipeline against a hold-out test set comprising 100 samples yielded an aggregate $R^2$ of \textbf{0.9752}, satisfying the assignment's $>97\%$ accuracy threshold. Table \ref{tab:ml} details the individual target scores. 
 
 \begin{table}[H]
     \centering
@@ -225,8 +252,8 @@ Figure \ref{fig:ml_plot} visualizes the actual versus predicted outputs across a
     \label{fig:ml_plot}
 \end{figure}
 
-\section{Conclusion}
-A comprehensive computational algorithm and design window were successfully developed for transmission line analysis. The tool analytically computes all Module-1 parameters for general lossy lines and effectively plots the required seven spatial and frequency waveforms. Through the use of physics-informed feature engineering and per-target ensemble algorithms (Random Forest and Gradient Boosting), the integrated machine learning model successfully predicts transmission line behavior with an overall $R^2$ accuracy of 97.52\%, exceeding the 97\% assignment requirement.
+\section{Concluding Remarks}
+This project successfully delivered a standalone Python framework capable of extensive transmission line evaluation. The core mathematical engine reliably processes non-ideal lossy parameters, pairing them with robust visualization modules to output 3D wave profiles, frequency characteristics, and analytical matching solutions. By employing domain-specific feature engineering alongside targeted regression ensembles, the integrated machine learning component proved highly effective, culminating in a 97.52\% prediction accuracy that reliably exceeds the initial assignment benchmarks.
 
 \clearpage
 \section*{Appendix: Source Code Listings}

@@ -286,13 +286,16 @@ class TxLineApp(tk.Tk):
         self._tab_canvases = {}
 
         tab_labels = [
-            "Voltage |V|",
-            "Current |I|",
-            "Reflection |Γ|",
+            "Voltage |V(z)|",
+            "Current |I(z)|",
+            "Reflection |Γ(z)|",
             "Zin vs z",
             "VSWR vs f",
             "α & β vs f",
             "Standing Wave",
+            "Loss Behavior",
+            "3D Wave Visualizations",
+            "Impedance Matching",
             "ML Performance",
         ]
         for label in tab_labels:
@@ -378,7 +381,7 @@ class TxLineApp(tk.Tk):
         p = self._get_params()
         if p is None:
             return
-        self._status("Generating all 7 waveform plots — please wait...")
+        self._status("Generating all 10 analytical plots — please wait...")
         self._compute()   # refresh analytics first
 
         def _worker():
@@ -400,13 +403,16 @@ class TxLineApp(tk.Tk):
     def _render_plots(self, figs):
         """Embed matplotlib figures into Notebook tabs."""
         tab_labels = [
-            "Voltage |V|",
-            "Current |I|",
-            "Reflection |Γ|",
+            "Voltage |V(z)|",
+            "Current |I(z)|",
+            "Reflection |Γ(z)|",
             "Zin vs z",
             "VSWR vs f",
             "α & β vs f",
             "Standing Wave",
+            "Loss Behavior",
+            "3D Wave Visualizations",
+            "Impedance Matching",
         ]
         for (title, fig), tab_label in zip(figs, tab_labels):
             frm = self._tab_frames[tab_label]
@@ -419,7 +425,7 @@ class TxLineApp(tk.Tk):
             canvas.get_tk_widget().pack(fill="both", expand=True)
             self._tab_canvases[tab_label] = canvas
 
-        self._status("✓ All 7 plots generated and saved to plots_output/")
+        self._status("✓ All 10 analytical plots generated and saved to plots_output/")
 
         # Also try ML performance plot if model is ready
         if self._bundle is not None:
